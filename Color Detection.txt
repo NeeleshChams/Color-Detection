@@ -1,0 +1,47 @@
+!pip install opencv-python numpy pandas
+
+import cv2
+import pandas as pd
+
+img = cv2.imread('C:/Users/Neelish Chamoli/Desktop/colordetection/color.jpg')
+
+index=["color","color_name","hex","R","G","B"]
+csv = pd.read_csv('C:/Users/Neelish Chamoli/Desktop/colordetection/colors.csv', names=index)
+
+clicked = False
+
+
+def draw_function(event,x,y,flags,param):
+    global clicked,r,g,b
+    if event == cv2.EVENT_LBUTTONDBLCLK:
+        clicked = True
+        b,g,r = img[y,x]
+        b,g,r = int(b),int(g),int(r)
+ 
+def getcolor(R,G,B):
+    min_distance = 1000
+    for i in range(len(csv)):
+        d = abs(R-int(csv.loc[i,"R"]))+abs(G-int(csv.loc[i,"G"]))+abs(B-int(csv.loc[i,"B"]))
+        if(d<=min_distance):
+            min_distance = d
+            cname = csv.loc[i,"color_name"]
+    return cname 
+                        
+        
+cv2.namedWindow('Color detection')
+cv2.setMouseCallback('Color detection',draw_function)
+
+while True:
+    cv2.imshow("Color detection",img)
+    if clicked:
+        cv2.rectangle(img,(10,20), (600,60), (b,g,r), -1)
+        text = getcolor(r,g,b)+ ' ('+ str(r) +','+ str(g) +','+ str(b) +')'
+        cv2.putText(img, text,(50,50),3,0.8,(255,255,255),2)
+        if(r+g+b>=500):
+            cv2.putText(img, text,(50,50),3,0.8,(0,0,0),2)
+        clicked = False
+    if cv2.waitKey(1) == 27:
+        break
+cv2.destroyAllWindows()
+                            
+                            
